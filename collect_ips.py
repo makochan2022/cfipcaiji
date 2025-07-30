@@ -8,9 +8,11 @@ urls = [
     'https://api.uouin.com/cloudflare.html'
 ]
 
-# 正则表达式用于匹配IP地址
+# 正则表达式用于匹配IPv4地址（保持不变）
 ipv4_pattern = r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'
-ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:?(?::[0-9a-fA-F]{1,4}){1,7})'
+
+# 更严格的IPv6正则表达式，匹配标准和压缩格式
+ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:(?::[0-9a-fA-F]{1,4}){1,7}|::)'
 
 # 检查ip.txt和ipv6.txt文件是否存在，如果存在则删除
 for file in ['ip.txt', 'ipv6.txt']:
@@ -20,6 +22,32 @@ for file in ['ip.txt', 'ipv6.txt']:
 # 使用集合存储IP地址实现自动去重
 unique_ipv4 = set()
 unique_ipv6 = set()
+
+def is_valid_ipv6(ip):
+    """验证IPv6地址是否合法"""
+    try:
+        # 分割地址并检查每组是否有效
+        parts = ip.split(':')
+        if len(parts) > 8:
+            return False
+        # 检查压缩格式（::）是否只出现一次
+        if '::' in ip:
+            if ip.count('::') > 1:
+                return False
+            # 确保压缩后段数合理
+            expanded = ip.replace('::', ':' * (9 - len(parts)))
+            parts = expanded.split(':')
+            if len(parts) != 8:
+                return False
+        elif len(parts) != 8:
+            return False
+        # 验证每组是合法的十六进制（0-FFFF）
+        for part in parts:
+            if part and (len(part) > 4 or not all(c in '0123456789abcdefABCDEF' for c in part)):
+                return False
+        return True
+    except:
+        return False
 
 for url in urls:
     try:
@@ -37,7 +65,15 @@ for url in urls:
             
             # 使用正则表达式查找IPv6地址
             ipv6_matches = re.findall(ipv6_pattern, html_content, re.IGNORECASE)
-            unique_ipv6.update(ipv6_matches)
+            # 验证并添加合法的IPv6地址
+            for ip in ipv6_matches:
+                if is_valid_ipv6(ip):
+                    # 转换为小写并规范化（移除多余前导零）
+                    normalized_ip = ':'.join(
+                        str(hex(int(part, 16))[2:].zfill(4).lower()) if part else ''
+                        for part in ip.replace('::', ':' * (9 - ip.count(':'))).split(':')
+                    ) if '::' not in ip else ip.lower()
+                    unique_ipv6.add(normalized_ip)
     except requests.exceptions.RequestException as e:
         print(f'请求 {url} 失败: {e}')
         continue
