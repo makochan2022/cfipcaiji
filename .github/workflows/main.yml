@@ -2,8 +2,8 @@ name: Update IP List
 
 on:
   schedule:
-    - cron: '0 */1 * * *' # 每1小时运行一次
-  workflow_dispatch: # 允许手动触发
+    - cron: '0 */1 * * *' # Run every 1 hours
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   update-ip-list:
@@ -27,7 +27,7 @@ jobs:
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ github.token }}
-        仓库: ${{ github.repository }}
+        repository: ${{ github.repository }}
         retain_days: 2
         keep_minimum_runs: 6
         
