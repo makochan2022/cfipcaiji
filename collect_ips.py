@@ -5,9 +5,7 @@ import os
 
 # Target URL list
 urls = [
-    'https://ip.164746.xyz', 
-    'https://cf.090227.xyz', 
-    'https://stock.hostmonit.com/CloudFlareYes',
+    'https://stock.hostmonit.com/CloudFlareYesV6',
     'https://www.wetest.vip/page/cloudflare/address_v4.html'
 ]
 
@@ -17,10 +15,13 @@ ipv4_pattern = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2
 # Strict IPv6 regular expression
 ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:(?::[0-9a-fA-F]{1,4}){1,7}|::)'
 
-# Check if ip.txt and ipv6.txt exist, and delete them if they do
-for file in ['ip.txt'， 'ipv6.txt']:
-    if os.path.exists(file):
-        os.remove(file)
+# Define files to process
+files_to_process = ['ip.txt'， 'ipv6.txt']
+
+# Check if files exist and delete them
+for file_name in files_to_process:
+    if os.path.exists(file_name):
+        os.remove(file_name)
 
 # Use sets to store IP addresses for automatic deduplication
 unique_ipv4 = set()
@@ -98,10 +99,10 @@ with open('ipv6.txt', 'w') as file:
         print("No valid IPv6 addresses found, creating empty ipv6.txt.")
 
 # Print file contents for debugging
-for file in ['ip.txt', 'ipv6.txt']:
-    if os.path.exists(file):
-        print(f"{file} contents:")
-        with open(file, 'r') as f:
+for file_name in files_to_process:
+    if os.path.exists(file_name):
+        print(f"{file_name} contents:")
+        with open(file_name, 'r') as f:
             print(f.read() or "Empty file")
     else:
-        print(f"{file} not generated")
+        print(f"{file_name} not generated")
