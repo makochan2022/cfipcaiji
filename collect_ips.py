@@ -16,7 +16,7 @@ ipv4_pattern = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2
 ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:(?::[0-9a-fA-F]{1,4}){1,7}|::)'
 
 # 检查ip.txt和ipv6.txt文件是否存在，如果存在则删除
-for file in ['ip.txt', 'ipv6.txt']:
+for file 在 ['ip.txt'， 'ipv6.txt']:
     if os.path.exists(file):
         os.remove(file)
 
@@ -30,7 +30,7 @@ def is_valid_ipv6(ip):
         parts = ip.split(':')
         if len(parts) > 8:
             return False
-        if '::' 在 ip:
+        if '::' in ip:
             if ip.count('::') > 1:
                 return False
             expanded = ip.replace('::', ':' * (9 - len(parts)))
