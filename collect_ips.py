@@ -16,7 +16,7 @@ ipv4_pattern = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2
 ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:(?::[0-9a-fA-F]{1,4}){1,7}|::)'
 
 # Define files to process
-files_to_process = ['ip.txt', 'ipv6.txt']
+files_to_process = ['ip.txt', 'ipv6.txt', 'ipv4notls.txt', 'ipv6notls.txt']
 
 # Check if files exist and delete them
 for file_name in files_to_process:
@@ -79,7 +79,7 @@ for url in urls:
         print(f"Request to {url} failed: {e}")
         continue
 
-# Always create files, even if empty
+# Save IPv4 addresses to ip.txt (port 443) and ipv4notls.txt (port 80)
 with open('ip.txt', 'w') as file:
     if unique_ipv4:
         sorted_ipv4 = sorted(unique_ipv4, key=lambda ip: [int(part) for part in ip.split('.')])
@@ -89,6 +89,16 @@ with open('ip.txt', 'w') as file:
     else:
         print("No valid IPv4 addresses found, creating empty ip.txt.")
 
+with open('ipv4notls.txt', 'w') as file:
+    if unique_ipv4:
+        sorted_ipv4 = sorted(unique_ipv4, key=lambda ip: [int(part) for part in ip.split('.')])
+        for index, ip in enumerate(sorted_ipv4, start=1):
+            file.write(f"{ip}:80#CF优选节点{index:02d}\n")
+        print(f"Saved {len(sorted_ipv4)} unique IPv4 addresses to ipv4notls.txt.")
+    else:
+        print("No valid IPv4 addresses found, creating empty ipv4notls.txt.")
+
+# Save IPv6 addresses to ipv6.txt (port 443) and ipv6notls.txt (port 80)
 with open('ipv6.txt', 'w') as file:
     if unique_ipv6:
         sorted_ipv6 = sorted(unique_ipv6)
@@ -97,6 +107,15 @@ with open('ipv6.txt', 'w') as file:
         print(f"Saved {len(sorted_ipv6)} unique IPv6 addresses to ipv6.txt.")
     else:
         print("No valid IPv6 addresses found, creating empty ipv6.txt.")
+
+with open('ipv6notls.txt', 'w') as file:
+    if unique_ipv6:
+        sorted_ipv6 = sorted(unique_ipv6)
+        for index, ip in enumerate(sorted_ipv6, start=1):
+            file.write(f"[{ip}]:80#CF优选节点{index:02d}\n")
+        print(f"Saved {len(sorted_ipv6)} unique IPv6 addresses to ipv6notls.txt.")
+    else:
+        print("No valid IPv6 addresses found, creating empty ipv6notls.txt.")
 
 # Print file contents for debugging
 for file_name in files_to_process:
