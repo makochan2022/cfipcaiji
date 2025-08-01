@@ -3,29 +3,31 @@ from bs4 import BeautifulSoup
 import re
 import os
 
-# 目标URL列表
+# Target URL list
 urls = [
-    'https://stock.hostmonit.com/CloudFlareYesV6',
+    'https://ip.164746.xyz', 
+    'https://cf.090227.xyz', 
+    'https://stock.hostmonit.com/CloudFlareYes',
     'https://www.wetest.vip/page/cloudflare/address_v4.html'
 ]
 
-# 正则表达式用于匹配IPv4地址
+# Regular expression for matching IPv4 addresses
 ipv4_pattern = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
-# 更严格的IPv6正则表达式
+# Strict IPv6 regular expression
 ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:(?::[0-9a-fA-F]{1,4}){1,7}|::)'
 
-# 检查ip.txt和ipv6.txt文件是否存在，如果存在则删除
-for file 在 ['ip.txt'， 'ipv6.txt']:
+# Check if ip.txt and ipv6.txt exist, and delete them if they do
+for file in ['ip.txt'， 'ipv6.txt']:
     if os.path.exists(file):
         os.remove(file)
 
-# 使用集合存储IP地址实现自动去重
+# Use sets to store IP addresses for automatic deduplication
 unique_ipv4 = set()
 unique_ipv6 = set()
 
 def is_valid_ipv6(ip):
-    """验证IPv6地址是否合法"""
+    """Validate if an IPv6 address is legal"""
     try:
         parts = ip.split(':')
         if len(parts) > 8:
@@ -48,58 +50,58 @@ def is_valid_ipv6(ip):
 
 for url in urls:
     try:
-        # 发送HTTP请求获取网页内容
-        print(f"尝试请求: {url}")
+        # Send HTTP request to fetch web content
+        print(f"Attempting to request: {url}")
         response = requests.get(url, timeout=10)
         
-        # 确保请求成功
+        # Ensure the request is successful
         if response.status_code == 200:
             html_content = response.text
-            print(f"成功获取 {url} 的内容，长度: {len(html_content)} 字节")
+            print(f"Successfully fetched {url}, content length: {len(html_content)} bytes")
             
-            # 使用正则表达式查找IPv4地址
+            # Find IPv4 addresses using regex
             ipv4_matches = re.findall(ipv4_pattern, html_content, re.IGNORECASE)
-            print(f"从 {url} 找到 {len(ipv4_matches)} 个IPv4地址: {ipv4_matches}")
+            print(f"Found {len(ipv4_matches)} IPv4 addresses from {url}: {ipv4_matches}")
             unique_ipv4.update(ipv4_matches)
             
-            # 使用正则表达式查找IPv6地址
+            # Find IPv6 addresses using regex
             ipv6_matches = re.findall(ipv6_pattern, html_content, re.IGNORECASE)
-            print(f"从 {url} 找到 {len(ipv6_matches)} 个IPv6地址: {ipv6_matches}")
-            # 验证并添加合法的IPv6地址
+            print(f"Found {len(ipv6_matches)} IPv6 addresses from {url}: {ipv6_matches}")
+            # Validate and add legal IPv6 addresses
             for ip in ipv6_matches:
                 if is_valid_ipv6(ip):
                     normalized_ip = ip.lower()
                     unique_ipv6.add(normalized_ip)
         else:
-            print(f"请求 {url} 返回状态码: {response.status_code}")
+            print(f"Request to {url} returned status code: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        print(f'请求 {url} 失败: {e}')
+        print(f"Request to {url} failed: {e}")
         continue
 
-# 始终创建文件，即使为空
+# Always create files, even if empty
 with open('ip.txt', 'w') as file:
     if unique_ipv4:
         sorted_ipv4 = sorted(unique_ipv4, key=lambda ip: [int(part) for part in ip.split('.')])
         for ip in sorted_ipv4:
             file.write(ip + '\n')
-        print(f'已保存 {len(sorted_ipv4)} 个唯一IPv4地址到ip.txt文件。')
+        print(f"Saved {len(sorted_ipv4)} unique IPv4 addresses to ip.txt.")
     else:
-        print('未找到有效的IPv4地址，创建空ip.txt文件。')
+        print("No valid IPv4 addresses found, creating empty ip.txt.")
 
 with open('ipv6.txt', 'w') as file:
     if unique_ipv6:
         sorted_ipv6 = sorted(unique_ipv6)
         for ip in sorted_ipv6:
             file.write(ip + '\n')
-        print(f'已保存 {len(sorted_ipv6)} 个唯一IPv6地址到ipv6.txt文件。')
+        print(f"Saved {len(sorted_ipv6)} unique IPv6 addresses to ipv6.txt.")
     else:
-        print('未找到有效的IPv6地址，创建空ipv6.txt文件。')
+        print("No valid IPv6 addresses found, creating empty ipv6.txt.")
 
-# 打印文件内容以便调试
+# Print file contents for debugging
 for file in ['ip.txt', 'ipv6.txt']:
     if os.path.exists(file):
-        print(f"{file} 内容:")
+        print(f"{file} contents:")
         with open(file, 'r') as f:
-            print(f.read() or "空文件")
+            print(f.read() or "Empty file")
     else:
-        print(f"{file} 未生成")
+        print(f"{file} not generated")
