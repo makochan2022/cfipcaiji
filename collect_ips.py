@@ -5,7 +5,7 @@ import os
 
 # Target URL list
 urls = [
-    'https://www.wetest.vip/page/cloudflare/address_v4.html',
+    'https://www.wetest.vip/page/cloudflare/total_v4.html',
     'https://www.wetest.vip/page/cloudflare/address_v6.html'
 ]
 
