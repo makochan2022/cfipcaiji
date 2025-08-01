@@ -5,7 +5,7 @@ import os
 
 # Target URL list
 urls = [
-    'https://stock.hostmonit.com/CloudFlareYesV6',
+    'https://api.uouin.com/cloudflare.html',
     'https://www.wetest.vip/page/cloudflare/address_v4.html'
 ]
 
