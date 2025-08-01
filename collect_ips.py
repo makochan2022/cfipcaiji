@@ -5,8 +5,8 @@ import os
 
 # Target URL list
 urls = [
-    'https://api.uouin.com/cloudflare.html',
-    'https://www.wetest.vip/page/cloudflare/address_v4.html'
+    'https://www.wetest.vip/page/cloudflare/address_v4.html',
+    'https://www.wetest.vip/page/cloudflare/address_v6.html'
 ]
 
 # Regular expression for matching IPv4 addresses
