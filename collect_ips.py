@@ -12,8 +12,8 @@ urls = [
 # Regular expression for matching IPv4 addresses
 ipv4_pattern = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
-# Strict IPv6 regular expression
-ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){1,6}|:(?::[0-9a-fA-F]{1,4}){1,7}|::)'
+# Updated IPv6 regular expression to match all valid formats, including compressed ones
+ipv6_pattern = r'(?:(?:[0-9a-fA-F]{1,4}:){0,7}(?::[0-9a-fA-F]{1,4}){0,7}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){0,6}|(?::[0-9a-fA-F]{1,4}){0,7}|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){0,5}:|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){0,4}::|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){0,3}::|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4}){0,2}::|[0-9a-fA-F]{1,4}:(?::[0-9a-fA-F]{1,4})?::|:(?::[0-9a-fA-F]{1,4}){0,6}::|::)'
 
 # Define files to process
 files_to_process = ['ip.txt', 'ipv6.txt', 'ipv4notls.txt', 'ipv6notls.txt']
@@ -30,21 +30,40 @@ unique_ipv6 = set()
 def is_valid_ipv6(ip):
     """Validate if an IPv6 address is legal"""
     try:
+        # Split the address by ':'
         parts = ip.split(':')
-        if len(parts) > 8:
-            return False
-        if '::' in ip:
-            if ip.count('::') > 1:
+        # Count non-empty parts and check for valid :: compression
+        non_empty_parts = [p for p in parts if p]
+        double_colon = ip.count('::')
+        
+        # If no ::, must have exactly 8 parts
+        if double_colon == 0:
+            if len(parts) != 8:
                 return False
-            expanded = ip.replace('::', ':' * (9 - len(parts)))
+        # If :: exists, must have at most 7 parts (since :: replaces at least one zero block)
+        elif double_colon == 1:
+            if len(parts) > 8:
+                return False
+        else:
+            return False  # More than one :: is invalid
+        
+        # Check each part
+        for part in non_empty_parts:
+            if len(part) > 4 or not all(c in '0123456789abcdefABCDEF' for c in part):
+                return False
+        
+        # Expand compressed address to verify total length
+        if double_colon == 1:
+            # Calculate missing zero blocks
+            missing_blocks = 8 - (len(parts) - 1)  # Subtract 1 for the :: itself
+            if missing_blocks < 1:
+                return False
+            # Expand :: with zeros
+            expanded = ip.replace('::', ':' + '0:' * missing_blocks)
             parts = expanded.split(':')
             if len(parts) != 8:
                 return False
-        elif len(parts) != 8:
-            return False
-        for part in parts:
-            if part and (len(part) > 4 or not all(c in '0123456789abcdefABCDEF' for c in part)):
-                return False
+        
         return True
     except:
         return False
