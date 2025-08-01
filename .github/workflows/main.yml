@@ -36,8 +36,8 @@ jobs:
       
     - name: Debug file existence
       run: |
-        echo "Checking for ip.txt and ipv6.txt"
-        ls -l ip.txt ipv6.txt || echo "One or both files not found"
+        echo "Checking for ip.txt, ipv6.txt, ipv4notls.txt, and ipv6notls.txt"
+        ls -l ip.txt ipv6.txt ipv4notls.txt ipv6notls.txt || echo "One or more files not found"
         if [ -f ip.txt ]; then
           echo "ip.txt contents:"
           cat ip.txt
@@ -50,12 +50,24 @@ jobs:
         else
           echo "ipv6.txt does not exist"
         fi
+        if [ -f ipv4notls.txt ]; then
+          echo "ipv4notls.txt contents:"
+          cat ipv4notls.txt
+        else
+          echo "ipv4notls.txt does not exist"
+        fi
+        if [ -f ipv6notls.txt ]; then
+          echo "ipv6notls.txt contents:"
+          cat ipv6notls.txt
+        else
+          echo "ipv6notls.txt does not exist"
+        fi
         
     - name: Commit and push changes
       run: |
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Action"
-        git add ip.txt ipv6.txt
+        git add ip.txt ipv6.txt ipv4notls.txt ipv6notls.txt
         git commit -m "Automatic update" || echo "No changes to commit, forcing commit"
         git push
       env:
