@@ -103,7 +103,7 @@ with open('ip.txt', 'w') as file:
     if unique_ipv4:
         sorted_ipv4 = sorted(unique_ipv4, key=lambda ip: [int(part) for part in ip.split('.')])
         for index, ip in enumerate(sorted_ipv4, start=1):
-            file.write(f"{ip}:2053#TLS优选节点V4{index:02d}\n")
+            file.write(f"{ip}:2053#TLSV4优选节点{index:02d}\n")
         print(f"Saved {len(sorted_ipv4)} unique IPv4 addresses to ip.txt.")
     else:
         print("No valid IPv4 addresses found, creating empty ip.txt.")
