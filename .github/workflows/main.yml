@@ -2,7 +2,7 @@ name: Update IP List
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Run every 0.5 hours
+    - cron: '*/15 * * * *' # Run every 0.25 hours
   workflow_dispatch: # Allow manual trigger
 
 jobs:
